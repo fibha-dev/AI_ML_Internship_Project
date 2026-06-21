@@ -4,7 +4,6 @@ import numpy as np
 import pickle
 import os
 
-# CORS (IMPORTANT for React frontend later)
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -14,16 +13,14 @@ app = FastAPI(
     version="1.0"
 )
 
-# Allow frontend (React) to connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # later you can restrict to React URL
+    allow_origins=["http://localhost:3000"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ---------- Load model and scaler ----------
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 model_path = os.path.join(BASE_DIR, "models", "fraud_model.pkl")
@@ -36,7 +33,6 @@ with open(scaler_path, "rb") as f:
     scaler = pickle.load(f)
 
 
-# ---------- Input schema ----------
 class Transaction(BaseModel):
     features: list[float] = Field(
         ...,
@@ -46,15 +42,12 @@ class Transaction(BaseModel):
     )
 
 
-# ---------- Home route ----------
 @app.get("/")
 def home():
     return {
         "message": "Fraud Detection API is running"
     }
 
-
-# ---------- Prediction route ----------
 @app.post("/predict")
 def predict(data: Transaction):
 
