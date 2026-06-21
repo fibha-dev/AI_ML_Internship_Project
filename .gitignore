@@ -1,19 +1,29 @@
 # Python
+.venv/
 __pycache__/
 *.pyc
-
-# Virtual environment
-.venv/
 
 # Jupyter
 .ipynb_checkpoints/
 
-# VSCode
-.vscode/
-
-# Models
+# Data (IMPORTANT)
+data/
+*.csv
 *.pkl
 
-# OS files
+# Node
+node_modules/
+/frontend/node_modules/
+
+# Build
+/frontend/build
+
+# Env
+.env*
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+
+# OS
 .DS_Store
-Thumbs.db
