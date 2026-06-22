@@ -4,6 +4,10 @@ import numpy as np
 import pickle
 import os
 
+print("CURRENT DIR:", os.getcwd())
+print("FILES:", os.listdir())
+print("MODEL DIR:", os.listdir("models"))
+
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -21,10 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-
-model_path = os.path.join(BASE_DIR, "models", "fraud_model.pkl")
-scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
+model_path = "models/fraud_model.pkl"
+scaler_path = "models/scaler.pkl"
 
 with open(model_path, "rb") as f:
     model = pickle.load(f)

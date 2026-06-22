@@ -2,10 +2,13 @@ import { useState } from "react";
 import axios from "axios";
 import "./App.css";
 
+console.log("API URL:", process.env.REACT_APP_API_URL);
+
 function App() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+
 
   const handleSubmit = async () => {
     try {
@@ -36,6 +39,7 @@ function App() {
 
   return (
     <div className="page">
+    
 
       <h1>Fraud Detection System</h1>
       <p>Enter 30 comma-separated values (Amount + Time included)</p>
@@ -52,9 +56,9 @@ function App() {
 
       {result && (
         <div className={`result ${result}`}>
-          {result === "FRAUD" && "🚨 Fraud Detected"}
-          {result === "SAFE" && "✅ Transaction Safe"}
-          {result === "ERROR" && "⚠️ Enter exactly 30 valid numbers"}
+          {result === "FRAUD" && "Fraud Detected"}
+          {result === "SAFE" && "Transaction Safe"}
+          {result === "ERROR" && "Enter exactly 30 valid numbers"}
         </div>
       )}
 
