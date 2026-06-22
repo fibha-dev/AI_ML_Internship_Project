@@ -16,7 +16,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:3001",
-        "https://your-vercel-app.vercel.app"
+        "https://ai-ml-internship-project.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
