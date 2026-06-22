@@ -3,13 +3,7 @@ from pydantic import BaseModel, Field
 import numpy as np
 import pickle
 import os
-
-print("CURRENT DIR:", os.getcwd())
-print("FILES:", os.listdir())
-print("MODEL DIR:", os.listdir("models"))
-
 from fastapi.middleware.cors import CORSMiddleware
-
 
 app = FastAPI(
     title="Credit Card Fraud Detection API",
@@ -19,19 +13,21 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-model_path = "models/fraud_model.pkl"
-scaler_path = "models/scaler.pkl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-with open(model_path, "rb") as f:
+MODEL_PATH = os.path.join(BASE_DIR, "../models/fraud_model.pkl")
+SCALER_PATH = os.path.join(BASE_DIR, "../models/scaler.pkl")
+
+with open(MODEL_PATH, "rb") as f:
     model = pickle.load(f)
 
-with open(scaler_path, "rb") as f:
+with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
 
 
@@ -50,10 +46,13 @@ def home():
         "message": "Fraud Detection API is running"
     }
 
+
 @app.post("/predict")
 def predict(data: Transaction):
 
     features = np.array(data.features).reshape(1, -1)
+
+    features = scaler.transform(features)
 
     prediction = model.predict(features)[0]
 
