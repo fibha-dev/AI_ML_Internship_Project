@@ -50,25 +50,11 @@ def home():
 @app.post("/predict")
 def predict(data: Transaction):
 
-    try:
-        print("INPUT:", data.features)
+    features = np.array(data.features).reshape(1, -1)
 
-        features = np.array(data.features).reshape(1, -1)
-        print("RESHAPED:", features.shape)
+    prediction = model.predict(features)[0]
 
-        features = scaler.transform(features)
-        print("SCALED DONE")
-
-        prediction = model.predict(features)[0]
-        print("PREDICTED:", prediction)
-
-        return {
-            "prediction": int(prediction),
-            "result": "Fraud" if prediction == 1 else "Normal"
-        }
-
-    except Exception as e:
-        print("ERROR:", str(e))
-        return {
-            "error": str(e)
-        }
+    return {
+        "prediction": int(prediction),
+        "result": "Fraud" if prediction == 1 else "Normal"
+    }
