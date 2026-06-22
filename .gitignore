@@ -9,11 +9,7 @@ __pycache__/
 # Data (IMPORTANT)
 data/
 *.csv
-*.pkl
 
-# Node
-node_modules/
-/frontend/node_modules/
 
 # Build
 /frontend/build
