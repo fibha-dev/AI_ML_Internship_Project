@@ -56,7 +56,9 @@ def predict(data: Transaction):
 
     features = np.array(data.features).reshape(1, -1)
 
-    prediction = model.predict(features)[0]
+    scaled_features = scaler.transform(features)
+
+    prediction = model.predict(scaled_features)[0]
 
     return {
         "prediction": int(prediction),
