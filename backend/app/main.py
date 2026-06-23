@@ -13,11 +13,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://ai-ml-internship-project.vercel.app"
-    ],
+    allow_origins=["*"],  # TEMP FIX ONLY FOR DEBUGGING
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,6 +30,8 @@ with open(MODEL_PATH, "rb") as f:
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
 
+print("SCALER FEATURES:", scaler.n_features_in_)
+print("INPUT SHAPE EXPECTED:", model.n_features_in_)
 
 class Transaction(BaseModel):
     features: list[float] = Field(
@@ -44,23 +42,31 @@ class Transaction(BaseModel):
     )
 
 
-@app.get("/")
-def home():
-    return {
-        "message": "Fraud Detection API is running"
-    }
-
+@app.get("/test-results")
+def test_results():
+    ...
 
 @app.post("/predict")
 def predict(data: Transaction):
 
-    features = np.array(data.features).reshape(1, -1)
+    try:
+        print("RAW INPUT:", data.features)
 
-    scaled_features = scaler.transform(features)
+        features = np.array(data.features).reshape(1, -1)
 
-    prediction = model.predict(scaled_features)[0]
+        print("SHAPE:", features.shape)
 
-    return {
-        "prediction": int(prediction),
-        "result": "Fraud" if prediction == 1 else "Normal"
-    }
+        scaled_features = scaler.transform(features)
+
+        print("SCALED DONE")
+
+        prediction = model.predict(scaled_features)[0]
+
+        return {
+            "prediction": int(prediction),
+            "result": "Fraud" if prediction == 1 else "Normal"
+        }
+
+    except Exception as e:
+        print("ERROR OCCURRED:", str(e))
+        raise e

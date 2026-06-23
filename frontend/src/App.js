@@ -22,7 +22,7 @@ function App() {
   const handleInputChange = (e) => {
     const text = e.target.value;
     setInput(text);
-    
+
     const values = parseInput(text);
     setValueCount(values.length);
     setError("");
@@ -57,6 +57,7 @@ function App() {
           features: values,
         }
       );
+
 
       const pred = Number(res.data.prediction);
       setResult(pred === 1 ? "FRAUD" : "SAFE");
@@ -122,15 +123,15 @@ function App() {
 
         {/* Button Group */}
         <div className="button-group">
-          <button 
-            onClick={handleSubmit} 
+          <button
+            onClick={handleSubmit}
             disabled={loading || valueCount !== 30}
             className="btn btn-primary"
           >
             <span className="btn-icon">⚡</span>
             {loading ? "Analyzing..." : "Analyze Transaction"}
           </button>
-          <button 
+          <button
             onClick={handleClear}
             disabled={loading}
             className="btn btn-secondary"
@@ -140,7 +141,6 @@ function App() {
           </button>
         </div>
 
-        {/* Result Section */}
         {result && (
           <div className={`result-container result-${result.toLowerCase()}`}>
             <div className="result-icon">
@@ -162,6 +162,27 @@ function App() {
             </div>
           </div>
         )}
+        {/* {table.length > 0 && (
+          <table>
+            <thead>
+              <tr>
+                <th>Actual</th>
+                <th>Predicted</th>
+                <th>Correct</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {table.map((row, i) => (
+                <tr key={i}>
+                  <td>{row.actual}</td>
+                  <td>{row.predicted}</td>
+                  <td>{row.correct ? "✔" : "❌"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )} */}
       </div>
     </div>
   );
