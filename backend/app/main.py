@@ -28,21 +28,16 @@ scaler = None
 # =========================
 # LOAD MODELS ON STARTUP
 # =========================
-@app.on_event("startup")
-def load_models():
-    global model, scaler
+from pathlib import Path
+import joblib
 
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent  # goes from /app/app → /app
 
-    MODEL_PATH = os.path.join(BASE_DIR, "models", "fraud_model.pkl")
-    SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
+MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
+SCALER_PATH = BASE_DIR / "models" / "scaler.pkl"
 
-    model = joblib.load(MODEL_PATH)
-    scaler = joblib.load(SCALER_PATH)
-
-    print("✅ MODEL LOADED:", type(model))
-    print("✅ SCALER LOADED:", type(scaler))
-    print("FEATURES:", scaler.n_features_in_)
+model = joblib.load(MODEL_PATH)
+scaler = joblib.load(SCALER_PATH)
 
 
 # =========================
