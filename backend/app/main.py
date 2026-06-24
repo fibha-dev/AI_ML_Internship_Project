@@ -60,15 +60,25 @@ def load_models():
         try:
             print("Loading test data...")
 
-            X_test = pd.read_csv(XTEST_PATH).head(200)
-            y_test = pd.read_csv(YTEST_PATH).head(200)
+            X_full = pd.read_csv(XTEST_PATH)
+            y_full = pd.read_csv(YTEST_PATH)
+
+            sample_indices = X_full.sample(n=1000, random_state=42).index
+
+            X_test = X_full.loc[sample_indices].reset_index(drop=True)
+            y_test = y_full.loc[sample_indices].reset_index(drop=True)
 
             print("TEST DATA LOADED SUCCESSFULLY")
+            print(y_test["Class"].value_counts())
 
         except Exception as e:
             print("TEST DATA FAILED:", str(e))
             X_test = None
             y_test = None
+
+        print("TEST DATA FAILED:", str(e))
+        X_test = None
+        y_test = None
 
         print("MODEL TYPE:", type(model))
         print("SCALER TYPE:", type(scaler))
@@ -108,19 +118,13 @@ def debug():
 @app.get("/random-test")
 def random_test():
 
-    print(type(y_test))
-    print(y_test.head())
-    print(y_test.value_counts())
-
     if X_test is None or y_test is None:
         return {"error": "Test data not loaded"}
 
-    fraud_indices = y_test[y_test.iloc[:, 0] == 1].index.tolist()
+    idx = random.randint(0, len(X_test)-1)
 
-    idx = random.choice(fraud_indices)
-
-    features = X_test.loc[idx].tolist()
-    actual = int(y_test.loc[idx].iloc[0])
+    features = X_test.iloc[idx].tolist()
+    actual = int(y_test.iloc[idx, 0])
 
     return {
         "features": features,
