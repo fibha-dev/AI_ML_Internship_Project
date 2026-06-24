@@ -2,7 +2,20 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 import numpy as np
 import pickle
+# import os
 import os
+import joblib
+
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "../models/fraud_model.pkl")
+SCALER_PATH = os.path.join(os.path.dirname(__file__), "../models/scaler.pkl")
+
+model = joblib.load(MODEL_PATH)
+scaler = joblib.load(SCALER_PATH)
+
+print("MODEL TYPE:", type(model))
+print("SCALER TYPE:", type(scaler))
+print("SCALER EXPECTED FEATURES:", scaler.n_features_in_)
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -13,25 +26,25 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TEMP FIX ONLY FOR DEBUGGING
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-MODEL_PATH = os.path.join(BASE_DIR, "../models/fraud_model.pkl")
-SCALER_PATH = os.path.join(BASE_DIR, "../models/scaler.pkl")
+# MODEL_PATH = os.path.join(BASE_DIR, "../models/fraud_model.pkl")
+# SCALER_PATH = os.path.join(BASE_DIR, "../models/scaler.pkl")
 
-with open(MODEL_PATH, "rb") as f:
-    model = pickle.load(f)
+# with open(MODEL_PATH, "rb") as f:
+#     model = pickle.load(f)
 
-with open(SCALER_PATH, "rb") as f:
-    scaler = pickle.load(f)
+# with open(SCALER_PATH, "rb") as f:
+#     scaler = pickle.load(f)
 
-print("SCALER FEATURES:", scaler.n_features_in_)
-print("INPUT SHAPE EXPECTED:", model.n_features_in_)
+# print("SCALER FEATURES:", scaler.n_features_in_)
+# print("INPUT SHAPE EXPECTED:", model.n_features_in_)
 
 class Transaction(BaseModel):
     features: list[float] = Field(
