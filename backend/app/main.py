@@ -135,3 +135,10 @@ def predict(data: Transaction):
         return {
             "error": str(e)
         }
+@app.get("/debug")
+def debug():
+    return {
+        "model_loaded": model is not None,
+        "scaler_loaded": scaler is not None,
+        "model_type": str(type(model)) if model else None
+    }
