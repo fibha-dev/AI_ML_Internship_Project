@@ -82,10 +82,18 @@ function App() {
         return;
       }
 
-      if (actual === null) {
-        setError("Please load a test sample first.");
-        return;
-      }
+      const payload = {
+  features: values
+};
+
+if (actual !== null) {
+  payload.actual = actual;
+}
+
+const res = await axios.post(
+  `${process.env.REACT_APP_API_URL}/predict`,
+  payload
+);
 
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL}/predict`,
