@@ -65,4 +65,4 @@ REST API communication
 Authentication system
 Database logging
 Better UI dashboard
-Advanced ML models.
+Advanced ML models..
