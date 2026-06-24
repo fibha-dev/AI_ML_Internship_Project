@@ -60,9 +60,13 @@ def load_models():
         print("MODEL PATH =", MODEL_PATH)
         print("SCALER PATH =", SCALER_PATH)
 
+        print("Loading model...")
         model = joblib.load(MODEL_PATH)
+        print("MODEL LOADED")
 
+        print("Loading scaler...")
         scaler = joblib.load(SCALER_PATH)
+        print("SCALER LOADED")
 
         print("MODEL TYPE =", type(model))
         print("SCALER FEATURES =", scaler.n_features_in_)
