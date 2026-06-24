@@ -67,50 +67,59 @@ function App() {
   };
 
   const handleSubmit = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
+    setResult(null);
+    setError("");
 
-      setResult(null);
-      setError("");
+    const values = parseInput(input);
 
-      const values = parseInput(input);
-
-      if (values.length !== 30) {
-        setError(
-          `Invalid input: Please enter exactly 30 values (you entered ${values.length})`
-        );
-        return;
-      }
-
-      const payload = {
-  features: values,
-};
-
-if (actual !== null) {
-  payload.actual = actual;
-}
-
-const res = await axios.post(
-  `${process.env.REACT_APP_API_URL}/predict`,
-  payload
-);
-
-console.log(res.data);
-      const pred = Number(res.data.prediction);
-
-      setPrediction(pred);
-      setCorrect(res.data.correct);
-      setActual(Number(res.data.actual));
-
-      setResult(pred === 1 ? "FRAUD" : "SAFE");
-    } catch (err) {
-      console.log(err);
-      setError("Connection error: Unable to reach server");
-      setResult("ERROR");
-    } finally {
-      setLoading(false);
+    if (values.length !== 30) {
+      setError(
+        `Invalid input: Please enter exactly 30 values (you entered ${values.length})`
+      );
+      return;
     }
-  };
+
+    const payload = {
+      features: values,
+    };
+
+    if (actual !== null) {
+      payload.actual = actual;
+    }
+
+    console.log("actual state =", actual);
+    console.log("payload =", payload);
+
+    const res = await axios.post(
+      `${process.env.REACT_APP_API_URL}/predict`,
+      payload
+    );
+
+    console.log("API response =", res.data);
+
+    const pred = Number(res.data.prediction);
+
+    setPrediction(pred);
+
+    if (res.data.actual !== undefined) {
+      setActual(Number(res.data.actual));
+    }
+
+    if (res.data.correct !== undefined) {
+      setCorrect(res.data.correct);
+    }
+
+    setResult(pred === 1 ? "FRAUD" : "SAFE");
+  } catch (err) {
+    console.log(err);
+    setError("Connection error: Unable to reach server");
+    setResult("ERROR");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleClear = () => {
     setInput("");
