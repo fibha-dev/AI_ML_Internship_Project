@@ -15,9 +15,6 @@ app = FastAPI(
     version="1.0"
 )
 
-# =========================
-# CORS
-# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,17 +23,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =========================
-# GLOBAL VARIABLES
-# =========================
 model = None
 scaler = None
 X_test = None
 y_test = None
 
-# =========================
-# PATHS
-# =========================
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
@@ -47,9 +39,7 @@ YTEST_PATH = BASE_DIR / "models" / "y_test.csv"
 print("MODEL PATH =", MODEL_PATH)
 print("SCALER PATH =", SCALER_PATH)
 
-# =========================
-# LOAD MODELS ON STARTUP
-# =========================
+
 @app.on_event("startup")
 def load_models():
 
@@ -66,9 +56,6 @@ def load_models():
         scaler = joblib.load(SCALER_PATH)
         print("Scaler loaded")
 
-        # -------------------------
-        # SAFE TEST DATA LOADING
-        # -------------------------
         try:
             print("Loading test data...")
 
@@ -91,9 +78,6 @@ def load_models():
         traceback.print_exc()
 
 
-# =========================
-# INPUT SCHEMA
-# =========================
 class Transaction(BaseModel):
     features: list[float] = Field(
         ...,
@@ -105,9 +89,6 @@ class Transaction(BaseModel):
     actual: int
 
 
-# =========================
-# ROUTES
-# =========================
 @app.get("/")
 def home():
     return {"message": "API running", "docs": "/docs"}

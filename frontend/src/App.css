@@ -12,14 +12,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Gradient Background */
 body {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   color: #1a202c;
 }
 
-/* Main Page Layout */
 .page {
   display: flex;
   justify-content: center;
@@ -49,7 +47,6 @@ body {
   }
 }
 
-/* Header Section */
 .header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -85,7 +82,6 @@ body {
   font-weight: 300;
 }
 
-/* Info Section */
 .info-section {
   display: flex;
   gap: 15px;
@@ -120,7 +116,6 @@ body {
   border-radius: 6px;
 }
 
-/* Input Wrapper */
 .input-wrapper {
   padding: 30px;
 }
@@ -135,7 +130,6 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* Textarea */
 .input-textarea {
   width: 100%;
   height: 200px;
@@ -168,7 +162,6 @@ body {
   color: #a0aec0;
 }
 
-/* Input Info */
 .input-info {
   display: flex;
   justify-content: space-between;
@@ -213,7 +206,6 @@ body {
   }
 }
 
-/* Button Group */
 .button-group {
   display: flex;
   gap: 12px;
@@ -280,7 +272,6 @@ body {
   cursor: not-allowed;
 }
 
-/* Result Container */
 .result-container {
   margin: 0 30px 30px;
   padding: 24px;
@@ -303,7 +294,6 @@ body {
   }
 }
 
-/* Result Variants */
 .result-fraud {
   background: #fef2f2;
   border-color: #feb2b2;
@@ -374,7 +364,6 @@ body {
   color: #92400e;
 }
 
-/* Footer Info */
 .footer-info {
   text-align: center;
   padding: 20px 30px;
@@ -384,7 +373,6 @@ body {
   color: #718096;
 }
 
-/* Table Styling */
 table {
   width: calc(100% - 60px);
   margin: 30px 30px 0;
@@ -443,12 +431,10 @@ table tbody tr:last-child {
   border-bottom: none;
 }
 
-/* Empty State */
 table tbody tr td {
   vertical-align: middle;
 }
 
-/* Responsive Table */
 @media (max-width: 480px) {
   table {
     width: calc(100% - 40px);
@@ -463,9 +449,6 @@ table tbody tr td {
   }
 }
 
-/* =========================
-   Prediction Details Card
-========================= */
 .details-card {
   margin: 0 30px 30px;
   padding: 24px;
@@ -536,9 +519,6 @@ table tbody tr td {
   color: #2d3748;
 }
 
-/* =========================
-   Correct / Incorrect colors
-========================= */
 
 .correct {
   color: #16a34a;
@@ -548,9 +528,6 @@ table tbody tr td {
   color: #dc2626;
 }
 
-/* =========================
-   Single Prediction Table
-========================= */
 
 .result-table {
   width: calc(100% - 60px);
@@ -583,9 +560,6 @@ table tbody tr td {
   border-bottom: none;
 }
 
-/* =========================
-   Accuracy Badge
-========================= */
 
 .accuracy-badge {
   display: inline-block;

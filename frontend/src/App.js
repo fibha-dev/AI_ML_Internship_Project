@@ -39,9 +39,6 @@ function App() {
     }
   };
 
-  // =====================================
-  // LOAD TEST SAMPLE
-  // =====================================
   const loadSample = async () => {
     try {
       setLoading(true);
@@ -69,9 +66,6 @@ function App() {
     }
   };
 
-  // =====================================
-  // ANALYZE
-  // =====================================
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -117,9 +111,6 @@ function App() {
     }
   };
 
-  // =====================================
-  // CLEAR
-  // =====================================
   const handleClear = () => {
     setInput("");
     setResult(null);
