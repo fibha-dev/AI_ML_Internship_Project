@@ -1,11 +1,12 @@
 FROM python:3.11-slim
-# force rebuild trigger
+
 WORKDIR /app
 
-COPY backend/requirements.txt /app/requirements.txt
+COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY backend /app
+COPY . .
 
 EXPOSE 8000
 
