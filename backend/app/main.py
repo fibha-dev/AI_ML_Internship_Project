@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from pathlib import Path
 import numpy as np
 import joblib
+import traceback
 
 app = FastAPI(
     title="Credit Card Fraud Detection API",
@@ -49,20 +50,22 @@ def load_models():
     global model, scaler
 
     try:
-        print("Loading model from:", MODEL_PATH)
-        print("Loading scaler from:", SCALER_PATH)
+        print("================================================")
+        print("STARTING MODEL LOAD")
+        print("MODEL PATH =", MODEL_PATH)
+        print("SCALER PATH =", SCALER_PATH)
 
         model = joblib.load(MODEL_PATH)
         scaler = joblib.load(SCALER_PATH)
 
-        print("MODEL TYPE:", type(model))
-        print("SCALER FEATURES:", scaler.n_features_in_)
-
+        print("MODEL TYPE =", type(model))
+        print("SCALER FEATURES =", scaler.n_features_in_)
         print("MODEL LOADED SUCCESSFULLY")
-        print("SCALER LOADED SUCCESSFULLY")
+        print("================================================")
 
-    except Exception as e:
-        print("MODEL LOAD ERROR:", str(e))
+    except Exception:
+        print("MODEL LOAD FAILED")
+        traceback.print_exc()
 
 
 # =========================
