@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from pathlib import Path
 import numpy as np
+import pandas as pd
+import random
 import joblib
 import traceback
 import sklearn
@@ -29,6 +31,8 @@ app.add_middleware(
 # =========================
 model = None
 scaler = None
+X_test = None
+y_test = None
 
 # =========================
 # PATHS
@@ -38,45 +42,54 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
 SCALER_PATH = BASE_DIR / "models" / "scaler.pkl"
 
+X_TEST_PATH = BASE_DIR / "models" / "X_test.csv"
+Y_TEST_PATH = BASE_DIR / "models" / "y_test.csv"
+
 print("CURRENT FILE =", __file__)
 print("BASE_DIR =", BASE_DIR)
-print("MODEL PATH =", MODEL_PATH)
-print("SCALER PATH =", SCALER_PATH)
 
 # =========================
-# LOAD MODELS ON STARTUP
+# LOAD EVERYTHING ON STARTUP
 # =========================
 @app.on_event("startup")
 def load_models():
-    
-    global model, scaler
-       
+
+    global model, scaler, X_test, y_test
+
     print("JOBLIB VERSION:", joblib.__version__)
     print("NUMPY VERSION:", np.__version__)
     print("SKLEARN VERSION:", sklearn.__version__)
+
     try:
         print("================================================")
-        print("STARTING MODEL LOAD")
-        print("MODEL PATH =", MODEL_PATH)
-        print("SCALER PATH =", SCALER_PATH)
+        print("STARTING LOAD")
 
+        # model
         print("Loading model...")
         model = joblib.load(MODEL_PATH)
         print("MODEL LOADED")
 
+        # scaler
         print("Loading scaler...")
         scaler = joblib.load(SCALER_PATH)
         print("SCALER LOADED")
 
+        # test data
+        print("Loading X_test...")
+        X_test = pd.read_csv(X_TEST_PATH)
+
+        print("Loading y_test...")
+        y_test = pd.read_csv(Y_TEST_PATH)
+
+        print("TEST DATA LOADED")
+
         print("MODEL TYPE =", type(model))
         print("SCALER FEATURES =", scaler.n_features_in_)
-        print("MODEL LOADED SUCCESSFULLY")
         print("================================================")
 
     except Exception:
-        print("MODEL LOAD FAILED")
+        print("LOAD FAILED")
         traceback.print_exc()
-
 
 # =========================
 # INPUT SCHEMA
@@ -89,9 +102,11 @@ class Transaction(BaseModel):
         description="Time, Amount, V1-V28 (30 values total)"
     )
 
+    actual: int
+
 
 # =========================
-# HOME ROUTE
+# HOME
 # =========================
 @app.get("/")
 def home():
@@ -102,27 +117,56 @@ def home():
 
 
 # =========================
-# TEST ROUTE
+# TEST
 # =========================
 @app.get("/test-results")
 def test_results():
     return {"status": "API running"}
 
 
+# =========================
+# DEBUG
+# =========================
 @app.get("/debug")
 def debug():
     return {
         "model_loaded": model is not None,
         "scaler_loaded": scaler is not None,
-        "model_type": str(type(model)) if model else None,
-        "scaler_type": str(type(scaler)) if scaler else None
+        "x_test_loaded": X_test is not None,
+        "y_test_loaded": y_test is not None,
+        "model_type": str(type(model)) if model else None
     }
+
+
 # =========================
-# PREDICT ROUTE
+# RANDOM TEST SAMPLE
+# =========================
+@app.get("/random-test")
+def random_test():
+
+    if X_test is None or y_test is None:
+        return {"error": "Test data not loaded"}
+
+    idx = random.randint(0, len(X_test)-1)
+
+    features = X_test.iloc[idx].tolist()
+
+    actual = int(y_test.iloc[idx, 0])
+
+    return {
+        "features": features,
+        "actual": actual
+    }
+
+
+# =========================
+# PREDICT
 # =========================
 @app.post("/predict")
 def predict(data: Transaction):
+
     try:
+
         if model is None or scaler is None:
             return {"error": "Model not loaded"}
 
@@ -136,11 +180,15 @@ def predict(data: Transaction):
 
         return {
             "prediction": prediction,
+            "actual": data.actual,
+            "correct": prediction == data.actual,
             "result": "Fraud" if prediction == 1 else "Normal"
         }
 
     except Exception as e:
+
+        traceback.print_exc()
+
         return {
             "error": str(e)
         }
-
