@@ -15,9 +15,6 @@ app = FastAPI(
     version="1.0"
 )
 
-# =========================
-# CORS
-# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,17 +23,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =========================
-# GLOBAL VARIABLES
-# =========================
 model = None
 scaler = None
 X_test = None
 y_test = None
 
-# =========================
-# PATHS
-# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
@@ -48,9 +39,6 @@ Y_TEST_PATH = BASE_DIR / "models" / "y_test.csv"
 print("CURRENT FILE =", __file__)
 print("BASE_DIR =", BASE_DIR)
 
-# =========================
-# LOAD EVERYTHING ON STARTUP
-# =========================
 @app.on_event("startup")
 def load_models():
 
@@ -64,17 +52,14 @@ def load_models():
         print("================================================")
         print("STARTING LOAD")
 
-        # model
         print("Loading model...")
         model = joblib.load(MODEL_PATH)
         print("MODEL LOADED")
 
-        # scaler
         print("Loading scaler...")
         scaler = joblib.load(SCALER_PATH)
         print("SCALER LOADED")
 
-        # test data
         print("Loading X_test...")
         X_test = pd.read_csv(X_TEST_PATH)
 
@@ -91,9 +76,7 @@ def load_models():
         print("LOAD FAILED")
         traceback.print_exc()
 
-# =========================
-# INPUT SCHEMA
-# =========================
+
 class Transaction(BaseModel):
     features: list[float] = Field(
         ...,
@@ -105,9 +88,6 @@ class Transaction(BaseModel):
     actual: int
 
 
-# =========================
-# HOME
-# =========================
 @app.get("/")
 def home():
     return {
@@ -116,17 +96,11 @@ def home():
     }
 
 
-# =========================
-# TEST
-# =========================
 @app.get("/test-results")
 def test_results():
     return {"status": "API running"}
 
 
-# =========================
-# DEBUG
-# =========================
 @app.get("/debug")
 def debug():
     return {
@@ -138,9 +112,6 @@ def debug():
     }
 
 
-# =========================
-# RANDOM TEST SAMPLE
-# =========================
 @app.get("/random-test")
 def random_test():
 
@@ -159,9 +130,6 @@ def random_test():
     }
 
 
-# =========================
-# PREDICT
-# =========================
 @app.post("/predict")
 def predict(data: Transaction):
 
