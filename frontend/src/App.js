@@ -100,6 +100,7 @@ function App() {
           actual: actual,
         }
       );
+      console.log(res.data);
 
       const pred = Number(res.data.prediction);
 
