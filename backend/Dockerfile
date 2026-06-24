@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY backend/ /app/
 
+RUN ls -R /app
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8000
