@@ -29,17 +29,19 @@ scaler = None
 # LOAD MODELS ON STARTUP
 # =========================
 from pathlib import Path
-import joblib
+import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent  # goes from /app/app → /app
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+print("CURRENT FILE =", __file__)
+print("BASE_DIR =", BASE_DIR)
+print("CONTENTS OF BASE_DIR =", os.listdir(BASE_DIR))
 
 MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
 SCALER_PATH = BASE_DIR / "models" / "scaler.pkl"
 
-model = joblib.load(MODEL_PATH)
-scaler = joblib.load(SCALER_PATH)
-
-
+print("MODEL PATH =", MODEL_PATH)
+print("SCALER PATH =", SCALER_PATH)
 # =========================
 # INPUT SCHEMA
 # =========================
