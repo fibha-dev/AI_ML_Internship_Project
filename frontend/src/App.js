@@ -249,25 +249,36 @@ function App() {
         )}
 
         {prediction !== null && (
-          <div className="evaluation-card">
+          <div className="details-card">
+            <div className="details-header">
+              <div className="details-icon">📊</div>
+              <div>
+                <h3>Model Evaluation</h3>
+                <p className="details-subtitle">
+                  Comparison between the predicted and actual outcome
+                </p>
+              </div>
+            </div>
 
-            <h2>Model Evaluation</h2>
+            <div className="details-grid">
+              <div className="detail-item">
+                <span className="detail-label">Predicted</span>
+                <span className={`detail-value ${prediction === 1 ? "incorrect" : "correct"}`}>
+                  {prediction === 1 ? "Fraud" : "Normal"}
+                </span>
+              </div>
 
-            <p>
-              <strong>Predicted:</strong>{" "}
-              {prediction === 1 ? "Fraud" : "Normal"}
-            </p>
+              <div className="detail-item">
+                <span className="detail-label">Actual</span>
+                <span className={`detail-value ${actual === 1 ? "incorrect" : "correct"}`}>
+                  {actual === 1 ? "Fraud" : "Normal"}
+                </span>
+              </div>
+            </div>
 
-            <p>
-              <strong>Actual:</strong>{" "}
-              {actual === 1 ? "Fraud" : "Normal"}
-            </p>
-
-            <p>
-              <strong>Correct:</strong>{" "}
-              {correct ? " Yes" : " No"}
-            </p>
-
+            <div className={`accuracy-badge ${correct ? "accuracy-good" : "accuracy-bad"}`}>
+              {correct ? "✓ Correct Prediction" : "✗ Incorrect Prediction"}
+            </div>
           </div>
         )}
 
