@@ -3,11 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from pathlib import Path
 import numpy as np
-import pandas as pd
-import random
 import joblib
 import traceback
 import sklearn
+import pandas as pd
+import random
 
 app = FastAPI(
     title="Credit Card Fraud Detection API",
@@ -15,6 +15,9 @@ app = FastAPI(
     version="1.0"
 )
 
+# =========================
+# CORS
+# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,92 +26,88 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# =========================
+# GLOBAL VARIABLES
+# =========================
 model = None
 scaler = None
 X_test = None
 y_test = None
 
+# =========================
+# PATHS
+# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
 SCALER_PATH = BASE_DIR / "models" / "scaler.pkl"
+XTEST_PATH = BASE_DIR / "models" / "X_test.csv"
+YTEST_PATH = BASE_DIR / "models" / "y_test.csv"
 
-X_TEST_PATH = BASE_DIR / "models" / "X_test.csv"
-Y_TEST_PATH = BASE_DIR / "models" / "y_test.csv"
+print("MODEL PATH =", MODEL_PATH)
+print("SCALER PATH =", SCALER_PATH)
 
-print("CURRENT FILE =", __file__)
-print("BASE_DIR =", BASE_DIR)
-
+# =========================
+# LOAD MODELS ON STARTUP
+# =========================
 @app.on_event("startup")
 def load_models():
 
     global model, scaler, X_test, y_test
 
-    print("JOBLIB VERSION:", joblib.__version__)
-    print("NUMPY VERSION:", np.__version__)
-    print("SKLEARN VERSION:", sklearn.__version__)
+    print("STARTING BACKEND LOAD")
 
     try:
-        print("================================================")
-        print("STARTING LOAD")
-
         print("Loading model...")
         model = joblib.load(MODEL_PATH)
-        print("MODEL LOADED")
+        print("Model loaded")
 
         print("Loading scaler...")
         scaler = joblib.load(SCALER_PATH)
-        print("SCALER LOADED")
+        print("Scaler loaded")
 
-        print("Loading X_test...")
-        X_test = pd.read_csv(X_TEST_PATH)
+        # -------------------------
+        # SAFE TEST DATA LOADING
+        # -------------------------
+        try:
+            print("Loading test data...")
 
-        print("Loading y_test...")
-        y_test = pd.read_csv(Y_TEST_PATH)
+            X_test = pd.read_csv(XTEST_PATH).head(200)
+            y_test = pd.read_csv(YTEST_PATH).head(200)
 
-        print("TEST DATA LOADED")
+            print("TEST DATA LOADED SUCCESSFULLY")
 
-        print("MODEL TYPE =", type(model))
-        print("SCALER FEATURES =", scaler.n_features_in_)
-        print("================================================")
+        except Exception as e:
+            print("TEST DATA FAILED:", str(e))
+            X_test = None
+            y_test = None
+
+        print("MODEL TYPE:", type(model))
+        print("SCALER TYPE:", type(scaler))
+        print("STARTUP COMPLETE")
 
     except Exception:
-        print("LOAD FAILED")
+        print("MODEL LOAD FAILED")
         traceback.print_exc()
-    
-    global X_test, y_test
-
-    try:
-       X_test = pd.read_csv(BASE_DIR / "models" / "X_test.csv")
-       y_test = pd.read_csv(BASE_DIR / "models" / "y_test.csv")
-
-       print("TEST DATA LOADED SUCCESSFULLY")
-    except Exception as e:
-       print("TEST DATA LOAD FAILED:", str(e))
 
 
+# =========================
+# INPUT SCHEMA
+# =========================
 class Transaction(BaseModel):
     features: list[float] = Field(
         ...,
         min_length=30,
-        max_length=30,
-        description="Time, Amount, V1-V28 (30 values total)"
+        max_length=30
     )
 
-    actual: int
 
-
+# =========================
+# ROUTES
+# =========================
 @app.get("/")
 def home():
-    return {
-        "message": "Credit Card Fraud Detection API is running",
-        "docs": "/docs"
-    }
-
-
-@app.get("/test-results")
-def test_results():
-    return {"status": "API running"}
+    return {"message": "API running", "docs": "/docs"}
 
 
 @app.get("/debug")
@@ -116,9 +115,7 @@ def debug():
     return {
         "model_loaded": model is not None,
         "scaler_loaded": scaler is not None,
-        "x_test_loaded": X_test is not None,
-        "y_test_loaded": y_test is not None,
-        "model_type": str(type(model)) if model else None
+        "test_loaded": X_test is not None
     }
 
 
@@ -128,11 +125,10 @@ def random_test():
     if X_test is None or y_test is None:
         return {"error": "Test data not loaded"}
 
-    idx = random.randint(0, len(X_test)-1)
+    idx = random.randint(0, len(X_test) - 1)
 
     features = X_test.iloc[idx].tolist()
-
-    actual = int(y_test.iloc[idx, 0])
+    actual = int(y_test.iloc[idx].values[0])
 
     return {
         "features": features,
@@ -144,29 +140,18 @@ def random_test():
 def predict(data: Transaction):
 
     try:
-
         if model is None or scaler is None:
             return {"error": "Model not loaded"}
 
         features = np.array(data.features).reshape(1, -1)
 
-        print("INPUT SHAPE:", features.shape)
-
-        scaled_features = scaler.transform(features)
-
-        prediction = int(model.predict(scaled_features)[0])
+        scaled = scaler.transform(features)
+        prediction = int(model.predict(scaled)[0])
 
         return {
             "prediction": prediction,
-            "actual": data.actual,
-            "correct": prediction == data.actual,
             "result": "Fraud" if prediction == 1 else "Normal"
         }
 
     except Exception as e:
-
-        traceback.print_exc()
-
-        return {
-            "error": str(e)
-        }
+        return {"error": str(e)}
