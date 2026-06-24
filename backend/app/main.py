@@ -108,6 +108,10 @@ def debug():
 @app.get("/random-test")
 def random_test():
 
+    print(type(y_test))
+    print(y_test.head())
+    print(y_test.value_counts())
+
     if X_test is None or y_test is None:
         return {"error": "Test data not loaded"}
 
