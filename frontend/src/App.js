@@ -83,7 +83,7 @@ function App() {
       }
 
       const payload = {
-  features: values
+  features: values,
 };
 
 if (actual !== null) {
@@ -95,15 +95,7 @@ const res = await axios.post(
   payload
 );
 
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/predict`,
-        {
-          features: values,
-          actual: actual,
-        }
-      );
-      console.log(res.data);
-
+console.log(res.data);
       const pred = Number(res.data.prediction);
 
       setPrediction(pred);
