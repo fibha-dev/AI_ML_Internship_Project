@@ -100,6 +100,7 @@ console.log(res.data);
 
       setPrediction(pred);
       setCorrect(res.data.correct);
+      setActual(Number(res.data.actual));
 
       setResult(pred === 1 ? "FRAUD" : "SAFE");
     } catch (err) {
