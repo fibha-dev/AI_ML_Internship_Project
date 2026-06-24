@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import joblib
 import traceback
+import sklearn
 
 app = FastAPI(
     title="Credit Card Fraud Detection API",
@@ -47,8 +48,12 @@ print("SCALER PATH =", SCALER_PATH)
 # =========================
 @app.on_event("startup")
 def load_models():
+    
     global model, scaler
-
+       
+    print("JOBLIB VERSION:", joblib.__version__)
+    print("NUMPY VERSION:", np.__version__)
+    print("SKLEARN VERSION:", sklearn.__version__)
     try:
         print("================================================")
         print("STARTING MODEL LOAD")
@@ -56,6 +61,7 @@ def load_models():
         print("SCALER PATH =", SCALER_PATH)
 
         model = joblib.load(MODEL_PATH)
+
         scaler = joblib.load(SCALER_PATH)
 
         print("MODEL TYPE =", type(model))
