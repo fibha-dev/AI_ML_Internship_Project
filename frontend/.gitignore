@@ -10,6 +10,8 @@ __pycache__/
 # Data (VERY IMPORTANT)
 data/
 *.csv
+!backend/models/X_test.csv
+!backend/models/y_test.csv
 *.pkl
 
 # React build

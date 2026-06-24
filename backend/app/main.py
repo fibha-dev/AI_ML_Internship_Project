@@ -75,6 +75,16 @@ def load_models():
     except Exception:
         print("LOAD FAILED")
         traceback.print_exc()
+    
+    global X_test, y_test
+
+    try:
+       X_test = pd.read_csv(BASE_DIR / "models" / "X_test.csv")
+       y_test = pd.read_csv(BASE_DIR / "models" / "y_test.csv")
+
+       print("TEST DATA LOADED SUCCESSFULLY")
+    except Exception as e:
+       print("TEST DATA LOAD FAILED:", str(e))
 
 
 class Transaction(BaseModel):
