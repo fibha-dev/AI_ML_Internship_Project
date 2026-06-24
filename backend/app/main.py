@@ -111,10 +111,12 @@ def random_test():
     if X_test is None or y_test is None:
         return {"error": "Test data not loaded"}
 
-    idx = random.randint(0, len(X_test) - 1)
+    fraud_indices = y_test[y_test.iloc[:, 0] == 1].index.tolist()
 
-    features = X_test.iloc[idx].tolist()
-    actual = int(y_test.iloc[idx].values[0])
+    idx = random.choice(fraud_indices)
+
+    features = X_test.loc[idx].tolist()
+    actual = int(y_test.loc[idx].iloc[0])
 
     return {
         "features": features,

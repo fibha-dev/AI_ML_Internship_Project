@@ -47,12 +47,16 @@ function App() {
         `${process.env.REACT_APP_API_URL}/random-test`
       );
 
+      console.log("random-test response =", res.data);
+
+
       const features = res.data.features;
 
       setInput(features.join(", "));
       setValueCount(features.length);
 
       setActual(res.data.actual);
+      console.log("actual loaded =", res.data.actual);
 
       setResult(null);
       setPrediction(null);
