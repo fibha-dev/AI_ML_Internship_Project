@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
-import numpy as np
-import os
-import joblib
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+from pathlib import Path
+import numpy as np
+import joblib
 
 app = FastAPI(
     title="Credit Card Fraud Detection API",
@@ -11,6 +11,9 @@ app = FastAPI(
     version="1.0"
 )
 
+# =========================
+# CORS
+# =========================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,28 +23,48 @@ app.add_middleware(
 )
 
 # =========================
-# GLOBAL VARIABLES (SAFE INIT)
+# GLOBAL VARIABLES
 # =========================
 model = None
 scaler = None
 
 # =========================
-# LOAD MODELS ON STARTUP
+# PATHS
 # =========================
-from pathlib import Path
-import os
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-print("CURRENT FILE =", __file__)
-print("BASE_DIR =", BASE_DIR)
-print("CONTENTS OF BASE_DIR =", os.listdir(BASE_DIR))
 
 MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
 SCALER_PATH = BASE_DIR / "models" / "scaler.pkl"
 
+print("CURRENT FILE =", __file__)
+print("BASE_DIR =", BASE_DIR)
 print("MODEL PATH =", MODEL_PATH)
 print("SCALER PATH =", SCALER_PATH)
+
+# =========================
+# LOAD MODELS ON STARTUP
+# =========================
+@app.on_event("startup")
+def load_models():
+    global model, scaler
+
+    try:
+        print("Loading model from:", MODEL_PATH)
+        print("Loading scaler from:", SCALER_PATH)
+
+        model = joblib.load(MODEL_PATH)
+        scaler = joblib.load(SCALER_PATH)
+
+        print("MODEL TYPE:", type(model))
+        print("SCALER FEATURES:", scaler.n_features_in_)
+
+        print("MODEL LOADED SUCCESSFULLY")
+        print("SCALER LOADED SUCCESSFULLY")
+
+    except Exception as e:
+        print("MODEL LOAD ERROR:", str(e))
+
+
 # =========================
 # INPUT SCHEMA
 # =========================
@@ -50,15 +73,20 @@ class Transaction(BaseModel):
         ...,
         min_length=30,
         max_length=30,
-        description="Time, Amount, V1–V28 (30 values total)"
+        description="Time, Amount, V1-V28 (30 values total)"
     )
 
+
+# =========================
+# HOME ROUTE
+# =========================
 @app.get("/")
 def home():
     return {
         "message": "Credit Card Fraud Detection API is running",
         "docs": "/docs"
     }
+
 
 # =========================
 # TEST ROUTE
@@ -69,22 +97,24 @@ def test_results():
 
 
 # =========================
-# PREDICT ROUTE (SAFE)
+# PREDICT ROUTE
 # =========================
 @app.post("/predict")
 def predict(data: Transaction):
-
     try:
         if model is None or scaler is None:
             return {"error": "Model not loaded"}
 
         features = np.array(data.features).reshape(1, -1)
 
+        print("INPUT SHAPE:", features.shape)
+
         scaled_features = scaler.transform(features)
-        prediction = model.predict(scaled_features)[0]
+
+        prediction = int(model.predict(scaled_features)[0])
 
         return {
-            "prediction": int(prediction),
+            "prediction": prediction,
             "result": "Fraud" if prediction == 1 else "Normal"
         }
 
