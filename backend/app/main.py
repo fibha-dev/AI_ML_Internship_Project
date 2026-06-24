@@ -53,6 +53,12 @@ class Transaction(BaseModel):
         description="Time, Amount, V1–V28 (30 values total)"
     )
 
+@app.get("/")
+def home():
+    return {
+        "message": "Credit Card Fraud Detection API is running",
+        "docs": "/docs"
+    }
 
 # =========================
 # TEST ROUTE
