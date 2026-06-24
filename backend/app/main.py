@@ -149,9 +149,12 @@ def predict(data: Transaction):
         prediction = int(model.predict(scaled)[0])
 
         return {
-            "prediction": prediction,
-            "result": "Fraud" if prediction == 1 else "Normal"
-        }
+         "prediction": prediction,
+         "actual": int(data.actual),
+         "correct": prediction == int(data.actual),
+         "result": "Fraud" if prediction == 1 else "Normal"
+             }
+        
 
     except Exception as e:
         return {"error": str(e)}
