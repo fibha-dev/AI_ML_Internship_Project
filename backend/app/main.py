@@ -8,6 +8,7 @@ import traceback
 import sklearn
 import pandas as pd
 import random
+from typing import Optional
 
 app = FastAPI(
     title="Credit Card Fraud Detection API",
@@ -78,6 +79,8 @@ def load_models():
         traceback.print_exc()
 
 
+
+
 class Transaction(BaseModel):
     features: list[float] = Field(
         ...,
@@ -85,8 +88,7 @@ class Transaction(BaseModel):
         max_length=30,
         description="Time, Amount, V1-V28 (30 values total)"
     )
-
-    actual: int
+    actual: Optional[int] = None
 
 
 @app.get("/")
@@ -132,13 +134,16 @@ def predict(data: Transaction):
         scaled = scaler.transform(features)
         prediction = int(model.predict(scaled)[0])
 
-        return {
-         "prediction": prediction,
-         "actual": int(data.actual),
-         "correct": prediction == int(data.actual),
-         "result": "Fraud" if prediction == 1 else "Normal"
-             }
-        
+        response = {
+            "prediction": prediction,
+            "result": "Fraud" if prediction == 1 else "Normal"
+        }
+
+        if data.actual is not None:
+            response["actual"] = int(data.actual)
+            response["correct"] = prediction == int(data.actual)
+
+        return response
 
     except Exception as e:
         return {"error": str(e)}
