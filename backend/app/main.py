@@ -109,6 +109,14 @@ def test_results():
     return {"status": "API running"}
 
 
+@app.get("/debug")
+def debug():
+    return {
+        "model_loaded": model is not None,
+        "scaler_loaded": scaler is not None,
+        "model_type": str(type(model)) if model else None,
+        "scaler_type": str(type(scaler)) if scaler else None
+    }
 # =========================
 # PREDICT ROUTE
 # =========================
@@ -135,10 +143,4 @@ def predict(data: Transaction):
         return {
             "error": str(e)
         }
-@app.get("/debug")
-def debug():
-    return {
-        "model_loaded": model is not None,
-        "scaler_loaded": scaler is not None,
-        "model_type": str(type(model)) if model else None
-    }
+
