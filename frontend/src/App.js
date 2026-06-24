@@ -9,182 +9,268 @@ function App() {
   const [valueCount, setValueCount] = useState(0);
   const [error, setError] = useState("");
 
+  const [actual, setActual] = useState(null);
+  const [prediction, setPrediction] = useState(null);
+  const [correct, setCorrect] = useState(null);
+
   const parseInput = (text) => {
     return text
       .trim()
       .replace(/[\n\t]/g, ",")
       .split(",")
-      .map(v => v.trim())
-      .filter(v => v !== "")
-      .map(v => Number(v));
+      .map((v) => v.trim())
+      .filter((v) => v !== "")
+      .map((v) => Number(v));
   };
 
   const handleInputChange = (e) => {
     const text = e.target.value;
+
     setInput(text);
 
     const values = parseInput(text);
+
     setValueCount(values.length);
+
     setError("");
 
-    if (values.length > 0 && values.some(v => Number.isNaN(v))) {
+    if (values.length > 0 && values.some((v) => Number.isNaN(v))) {
       setError("Some values are not valid numbers");
     }
   };
 
+  // =====================================
+  // LOAD TEST SAMPLE
+  // =====================================
+  const loadSample = async () => {
+    try {
+      setLoading(true);
+
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/random-test`
+      );
+
+      const features = res.data.features;
+
+      setInput(features.join(", "));
+      setValueCount(features.length);
+
+      setActual(res.data.actual);
+
+      setResult(null);
+      setPrediction(null);
+      setCorrect(null);
+      setError("");
+    } catch (err) {
+      console.log(err);
+      setError("Could not load sample");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================
+  // ANALYZE
+  // =====================================
   const handleSubmit = async () => {
     try {
       setLoading(true);
+
       setResult(null);
       setError("");
 
       const values = parseInput(input);
 
       if (values.length !== 30) {
-        setError(`Invalid input: Please enter exactly 30 values (you entered ${values.length})`);
+        setError(
+          `Invalid input: Please enter exactly 30 values (you entered ${values.length})`
+        );
         return;
       }
 
-      const hasInvalid = values.some(v => Number.isNaN(v));
-      if (hasInvalid) {
-        setError("Invalid input: Some values are not valid numbers");
+      if (actual === null) {
+        setError("Please load a test sample first.");
         return;
       }
-
-      console.log("API URL =", process.env.REACT_APP_API_URL);
 
       const res = await axios.post(
         `${process.env.REACT_APP_API_URL}/predict`,
         {
           features: values,
+          actual: actual,
         }
       );
 
-
       const pred = Number(res.data.prediction);
-      setResult(pred === 1 ? "FRAUD" : "SAFE");
 
+      setPrediction(pred);
+      setCorrect(res.data.correct);
+
+      setResult(pred === 1 ? "FRAUD" : "SAFE");
     } catch (err) {
       console.log(err);
-      setError("Connection error: Unable to reach the server");
+      setError("Connection error: Unable to reach server");
       setResult("ERROR");
     } finally {
       setLoading(false);
     }
   };
 
+  // =====================================
+  // CLEAR
+  // =====================================
   const handleClear = () => {
     setInput("");
     setResult(null);
     setError("");
     setValueCount(0);
+
+    setActual(null);
+    setPrediction(null);
+    setCorrect(null);
   };
 
   return (
     <div className="page">
       <div className="container">
-        {/* Header */}
+
         <div className="header">
           <div className="icon-header">🔐</div>
           <h1>Credit Card Fraud Detection</h1>
-          <p className="subtitle">Advanced ML-powered transaction analysis</p>
+          <p className="subtitle">
+            Advanced ML-powered transaction analysis
+          </p>
         </div>
 
-        {/* Info Section */}
         <div className="info-section">
           <div className="info-item">
             <span className="info-label">Features Required:</span>
             <span className="info-value">30 numerical values</span>
           </div>
+
           <div className="info-item">
             <span className="info-label">Format:</span>
-            <span className="info-value">Comma, space, or newline separated</span>
+            <span className="info-value">
+              Comma, space, or newline separated
+            </span>
           </div>
         </div>
 
-        {/* Input Section */}
         <div className="input-wrapper">
-          <label htmlFor="transaction-input" className="input-label">
+          <label className="input-label">
             Transaction Features
           </label>
+
           <textarea
-            id="transaction-input"
-            placeholder="Enter 30 values&#10;Example: 0.1, 1.2, 3.4, -2.1, 0.5, ...&#10;Values can be separated by commas, spaces, or new lines"
             value={input}
             onChange={handleInputChange}
             className="input-textarea"
             disabled={loading}
           />
+
           <div className="input-info">
-            <span className={`value-count ${valueCount === 30 ? 'valid' : valueCount > 0 ? 'warning' : ''}`}>
+            <span
+              className={`value-count ${
+                valueCount === 30
+                  ? "valid"
+                  : valueCount > 0
+                  ? "warning"
+                  : ""
+              }`}
+            >
               {valueCount}/30 values
             </span>
-            {error && <span className="error-message">{error}</span>}
+
+            {error && (
+              <span className="error-message">
+                {error}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Button Group */}
         <div className="button-group">
+
           <button
+            className="btn btn-secondary"
+            onClick={loadSample}
+            disabled={loading}
+          >
+            📋 Load Test Sample
+          </button>
+
+          <button
+            className="btn btn-primary"
             onClick={handleSubmit}
             disabled={loading || valueCount !== 30}
-            className="btn btn-primary"
           >
-            <span className="btn-icon">⚡</span>
-            {loading ? "Analyzing..." : "Analyze Transaction"}
+            ⚡ {loading ? "Analyzing..." : "Analyze Transaction"}
           </button>
+
           <button
+            className="btn btn-secondary"
             onClick={handleClear}
             disabled={loading}
-            className="btn btn-secondary"
           >
-            <span className="btn-icon">↻</span>
-            Clear
+            ↻ Clear
           </button>
+
         </div>
 
         {result && (
           <div className={`result-container result-${result.toLowerCase()}`}>
             <div className="result-icon">
-              {result === "FRAUD" && "⚠️"}
-              {result === "SAFE" && "✓"}
-              {result === "ERROR" && "❌"}
+              {result === "FRAUD" && ""}
+              {result === "SAFE" && ""}
+              {result === "ERROR" && ""}
             </div>
+
             <div className="result-content">
+
               <h2 className="result-title">
                 {result === "FRAUD" && "Fraud Detected"}
                 {result === "SAFE" && "Transaction Safe"}
                 {result === "ERROR" && "Analysis Failed"}
               </h2>
+
               <p className="result-message">
-                {result === "FRAUD" && "This transaction has been flagged as potentially fraudulent."}
-                {result === "SAFE" && "This transaction appears to be legitimate."}
-                {result === "ERROR" && "Please check your input and try again."}
+                {result === "FRAUD" &&
+                  "This transaction has been flagged as potentially fraudulent."}
+
+                {result === "SAFE" &&
+                  "This transaction appears to be legitimate."}
+
+                {result === "ERROR" &&
+                  "Please check your input and try again."}
               </p>
+
             </div>
           </div>
         )}
-        {/* {table.length > 0 && (
-          <table>
-            <thead>
-              <tr>
-                <th>Actual</th>
-                <th>Predicted</th>
-                <th>Correct</th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {table.map((row, i) => (
-                <tr key={i}>
-                  <td>{row.actual}</td>
-                  <td>{row.predicted}</td>
-                  <td>{row.correct ? "✔" : "❌"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )} */}
+        {prediction !== null && (
+          <div className="evaluation-card">
+
+            <h2>Model Evaluation</h2>
+
+            <p>
+              <strong>Predicted:</strong>{" "}
+              {prediction === 1 ? "Fraud" : "Normal"}
+            </p>
+
+            <p>
+              <strong>Actual:</strong>{" "}
+              {actual === 1 ? "Fraud" : "Normal"}
+            </p>
+
+            <p>
+              <strong>Correct:</strong>{" "}
+              {correct ? " Yes" : " No"}
+            </p>
+
+          </div>
+        )}
+
       </div>
     </div>
   );
