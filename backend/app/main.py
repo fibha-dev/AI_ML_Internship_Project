@@ -89,9 +89,6 @@ def load_models():
             X_test = None
             y_test = None
 
-        print("TEST DATA FAILED:", str(e))
-        X_test = None
-        y_test = None
 
         print("MODEL TYPE:", type(model))
         print("SCALER TYPE:", type(scaler))
@@ -126,20 +123,25 @@ def debug():
     }
 
 
-@app.get("/random-test")
-def random_test():
+@app.get("/sample/{label}")
+def load_sample(label: int):
 
     if X_test is None or y_test is None:
         return {"error": "Test data not loaded"}
 
-    idx = random.randint(0, len(X_test) - 1)
+    if label not in [0, 1]:
+        return {"error": "Label must be 0 (Normal) or 1 (Fraud)"}
 
-    features = X_test.iloc[idx].tolist()
-    actual = int(y_test.iloc[idx, 0])
+    matching_indices = y_test[y_test["Class"] == label].index.tolist()
+
+    if len(matching_indices) == 0:
+        return {"error": f"No samples found for class {label}"}
+
+    idx = random.choice(matching_indices)
 
     return {
-        "features": features,
-        "actual": actual
+        "features": X_test.iloc[idx].tolist(),
+        "actual": int(y_test.iloc[idx]["Class"])
     }
 
 
