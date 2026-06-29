@@ -39,29 +39,26 @@ function App() {
     }
   };
 
-  const loadSample = async () => {
+  const loadSample = async (label) => {
     try {
       setLoading(true);
 
       const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/random-test`
+        `${process.env.REACT_APP_API_URL}/sample/${label}`
       );
 
-      console.log("random-test response =", res.data);
+      console.log("Sample loaded:", res.data);
 
-
-      const features = res.data.features;
-
-      setInput(features.join(", "));
-      setValueCount(features.length);
+      setInput(res.data.features.join(", "));
+      setValueCount(res.data.features.length);
 
       setActual(res.data.actual);
-      console.log("actual loaded =", res.data.actual);
 
-      setResult(null);
       setPrediction(null);
       setCorrect(null);
+      setResult(null);
       setError("");
+
     } catch (err) {
       console.log(err);
       setError("Could not load sample");
@@ -71,59 +68,59 @@ function App() {
   };
 
   const handleSubmit = async () => {
-  try {
-    setLoading(true);
-    setResult(null);
-    setError("");
+    try {
+      setLoading(true);
+      setResult(null);
+      setError("");
 
-    const values = parseInput(input);
+      const values = parseInput(input);
 
-    if (values.length !== 30) {
-      setError(
-        `Invalid input: Please enter exactly 30 values (you entered ${values.length})`
+      if (values.length !== 30) {
+        setError(
+          `Invalid input: Please enter exactly 30 values (you entered ${values.length})`
+        );
+        return;
+      }
+
+      const payload = {
+        features: values,
+      };
+
+      if (actual !== null) {
+        payload.actual = actual;
+      }
+
+      console.log("actual state =", actual);
+      console.log("payload =", payload);
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/predict`,
+        payload
       );
-      return;
+
+      console.log("API response =", res.data);
+
+      const pred = Number(res.data.prediction);
+
+      setPrediction(pred);
+
+      if (res.data.actual !== undefined) {
+        setActual(Number(res.data.actual));
+      }
+
+      if (res.data.correct !== undefined) {
+        setCorrect(res.data.correct);
+      }
+
+      setResult(pred === 1 ? "FRAUD" : "SAFE");
+    } catch (err) {
+      console.log(err);
+      setError("Connection error: Unable to reach server");
+      setResult("ERROR");
+    } finally {
+      setLoading(false);
     }
-
-    const payload = {
-      features: values,
-    };
-
-    if (actual !== null) {
-      payload.actual = actual;
-    }
-
-    console.log("actual state =", actual);
-    console.log("payload =", payload);
-
-    const res = await axios.post(
-      `${process.env.REACT_APP_API_URL}/predict`,
-      payload
-    );
-
-    console.log("API response =", res.data);
-
-    const pred = Number(res.data.prediction);
-
-    setPrediction(pred);
-
-    if (res.data.actual !== undefined) {
-      setActual(Number(res.data.actual));
-    }
-
-    if (res.data.correct !== undefined) {
-      setCorrect(res.data.correct);
-    }
-
-    setResult(pred === 1 ? "FRAUD" : "SAFE");
-  } catch (err) {
-    console.log(err);
-    setError("Connection error: Unable to reach server");
-    setResult("ERROR");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleClear = () => {
     setInput("");
@@ -176,13 +173,12 @@ function App() {
 
           <div className="input-info">
             <span
-              className={`value-count ${
-                valueCount === 30
+              className={`value-count ${valueCount === 30
                   ? "valid"
                   : valueCount > 0
-                  ? "warning"
-                  : ""
-              }`}
+                    ? "warning"
+                    : ""
+                }`}
             >
               {valueCount}/30 values
             </span>
@@ -199,10 +195,18 @@ function App() {
 
           <button
             className="btn btn-secondary"
-            onClick={loadSample}
+            onClick={() => loadSample(0)}
             disabled={loading}
           >
-            📋 Load Test Sample
+            📋 Load Normal Sample
+          </button>
+
+          <button
+            className="btn btn-secondary"
+            onClick={() => loadSample(1)}
+            disabled={loading}
+          >
+            🚨 Load Fraud Sample
           </button>
 
           <button
