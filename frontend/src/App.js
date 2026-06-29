@@ -2,6 +2,13 @@ import { useState } from "react";
 import axios from "axios";
 import "./App.css";
 
+// 🔥 Smart API resolver (Docker Compose + Production safe)
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL_DOCKER &&
+  window.location.hostname === "localhost"
+    ? process.env.REACT_APP_API_URL_DOCKER
+    : process.env.REACT_APP_API_URL;
+
 function App() {
   const [input, setInput] = useState("");
   const [result, setResult] = useState(null);
@@ -44,7 +51,7 @@ function App() {
       setLoading(true);
 
       const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/sample/${label}`
+        `${API_BASE_URL}/sample/${label}`
       );
 
       console.log("Sample loaded:", res.data);
@@ -94,7 +101,7 @@ function App() {
       console.log("payload =", payload);
 
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/predict`,
+        `${API_BASE_URL}/predict`,
         payload
       );
 
@@ -173,12 +180,13 @@ function App() {
 
           <div className="input-info">
             <span
-              className={`value-count ${valueCount === 30
+              className={`value-count ${
+                valueCount === 30
                   ? "valid"
                   : valueCount > 0
                     ? "warning"
                     : ""
-                }`}
+              }`}
             >
               {valueCount}/30 values
             </span>
@@ -273,20 +281,26 @@ function App() {
             <div className="details-grid">
               <div className="detail-item">
                 <span className="detail-label">Predicted</span>
-                <span className={`detail-value ${prediction === 1 ? "incorrect" : "correct"}`}>
+                <span className={`detail-value ${
+                  prediction === 1 ? "incorrect" : "correct"
+                }`}>
                   {prediction === 1 ? "Fraud" : "Normal"}
                 </span>
               </div>
 
               <div className="detail-item">
                 <span className="detail-label">Actual</span>
-                <span className={`detail-value ${actual === 1 ? "incorrect" : "correct"}`}>
+                <span className={`detail-value ${
+                  actual === 1 ? "incorrect" : "correct"
+                }`}>
                   {actual === 1 ? "Fraud" : "Normal"}
                 </span>
               </div>
             </div>
 
-            <div className={`accuracy-badge ${correct ? "accuracy-good" : "accuracy-bad"}`}>
+            <div className={`accuracy-badge ${
+              correct ? "accuracy-good" : "accuracy-bad"
+            }`}>
               {correct ? "✓ Correct Prediction" : "✗ Incorrect Prediction"}
             </div>
           </div>
