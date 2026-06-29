@@ -270,14 +270,14 @@ function App() {
               <div className="detail-item">
                 <span className="detail-label">Predicted</span>
                 <span className={`detail-value ${prediction === 1 ? "incorrect" : "correct"}`}>
-                  {prediction === 1 ? "Fraud" : "Normal"}
+                  {prediction === 0 ? "Fraud" : "Normal"}
                 </span>
               </div>
 
               <div className="detail-item">
                 <span className="detail-label">Actual</span>
                 <span className={`detail-value ${actual === 1 ? "incorrect" : "correct"}`}>
-                  {actual === 1 ? "Fraud" : "Normal"}
+                  {actual === 0 ? "Fraud" : "Normal"}
                 </span>
               </div>
             </div>

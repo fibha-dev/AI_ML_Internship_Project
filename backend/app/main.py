@@ -29,7 +29,6 @@ scaler = None
 X_test = None
 y_test = None
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MODEL_PATH = BASE_DIR / "models" / "fraud_model.pkl"
@@ -63,11 +62,25 @@ def load_models():
             X_full = pd.read_csv(XTEST_PATH)
             y_full = pd.read_csv(YTEST_PATH)
 
-            sample_indices = X_full.sample(n=1000, random_state=42).index
+            combined = X_full.copy()
+            combined["Class"] = y_full["Class"]
 
-            X_test = X_full.loc[sample_indices].reset_index(drop=True)
-            y_test = y_full.loc[sample_indices].reset_index(drop=True)
+            fraud_rows = combined[combined["Class"] == 1]
 
+            normal_rows = combined[combined["Class"] == 0].sample(
+                n=1000,
+                random_state=42
+            )
+
+            sampled = pd.concat([normal_rows, fraud_rows]).sample(
+                frac=1,
+                random_state=42
+            )
+
+            X_test = sampled.drop(columns=["Class"]).reset_index(drop=True)
+            y_test = sampled[["Class"]].reset_index(drop=True)
+
+            print(y_test["Class"].value_counts())
             print("TEST DATA LOADED SUCCESSFULLY")
             print(y_test["Class"].value_counts())
 
@@ -87,8 +100,6 @@ def load_models():
     except Exception:
         print("MODEL LOAD FAILED")
         traceback.print_exc()
-
-
 
 
 class Transaction(BaseModel):
@@ -121,7 +132,7 @@ def random_test():
     if X_test is None or y_test is None:
         return {"error": "Test data not loaded"}
 
-    idx = random.randint(0, len(X_test)-1)
+    idx = random.randint(0, len(X_test) - 1)
 
     features = X_test.iloc[idx].tolist()
     actual = int(y_test.iloc[idx, 0])
