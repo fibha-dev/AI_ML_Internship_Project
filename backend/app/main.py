@@ -144,6 +144,10 @@ def load_sample(label: int):
         "actual": int(y_test.iloc[idx]["Class"])
     }
 
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
 
 @app.post("/predict")
 def predict(data: Transaction):

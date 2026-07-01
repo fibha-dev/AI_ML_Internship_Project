@@ -2,12 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-// 🔥 Smart API resolver (Docker Compose + Production safe)
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL_DOCKER &&
-  window.location.hostname === "localhost"
-    ? process.env.REACT_APP_API_URL_DOCKER
-    : process.env.REACT_APP_API_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 function App() {
   const [input, setInput] = useState("");

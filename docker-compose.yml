@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fraud-backend
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: fraud-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
